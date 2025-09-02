@@ -4,7 +4,7 @@
 
 **Live:** [https://test.next-nas.uk/](https://test.next-nas.uk/)
 
-> 이 프로젝트는 **알고리즘코리아** 면접 후 과제로 진행했습니다. (Assignment after interview at Algorithm Korea.)
+> 이 프로젝트는 **알고리즘코리아** 면접 후 과제로 진행했습니다.
 
 ---
 
