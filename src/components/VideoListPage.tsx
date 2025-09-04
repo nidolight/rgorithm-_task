@@ -69,7 +69,7 @@ return (
 <div style={styles.container}>
 <header style={styles.header}>
 <h1 style={styles.heading}>알고리즘코리아 React 과제</h1>
-<SearchBar value={keyword} onChange={setKeyword} onSubmit={onSubmit} placeholder="제목/카테고리 검색" />
+<SearchBar value={keyword} onChange={setKeyword} onSubmit={onSubmit} placeholder="제목 검색" />
 {query && <div style={styles.searchHint}>검색어: <b>{query}</b></div>}
 </header>
 
