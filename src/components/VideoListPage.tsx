@@ -48,22 +48,32 @@ setQuery(keyword.trim());
 
 
 const content = useMemo(() => {
-if (loading) return <div style={styles.state}>Loading…</div>;
-if (error) return (
-<div style={styles.state}>
-<div style={{ color: "#b91c1c" }}>불러오는 중 오류가 발생했습니다: {error}</div>
-<button style={styles.retryBtn} onClick={() => setPage((p) => p)}>Retry</button>
-</div>
-);
-if (!items.length) return (
-<div style={styles.empty}>
-<div style={{ fontSize: 40 }}>🔎</div>
-<div>검색 결과가 없습니다{query ? `: "${query}"` : ""}.</div>
-</div>
-);
-return <VideoGrid items={items} />;
+  if (loading) {
+    // ✅ 로딩 중에는 스켈레톤 그리드 렌더
+    return <VideoGrid items={[]} loading skeletonCount={9} />;
+  }
+  if (error) {
+    return (
+      <div style={styles.state}>
+        <div style={{ color: "#b91c1c" }}>
+          불러오는 중 오류가 발생했습니다: {error}
+        </div>
+        <button style={styles.retryBtn} onClick={() => setPage((p) => p)}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+  if (!items.length) {
+    return (
+      <div style={styles.empty}>
+        <div style={{ fontSize: 40 }}>🔎</div>
+        <div>검색 결과가 없습니다{query ? `: "${query}"` : ""}.</div>
+      </div>
+    );
+  }
+  return <VideoGrid items={items} />;
 }, [loading, error, items, query]);
-
 
 return (
 <div style={styles.container}>
@@ -77,7 +87,7 @@ return (
 {content}
 
 
-<Pagination current={page} last={lastPage} onPageChange={setPage} />
+<Pagination current={page} last={lastPage} onPageChange={setPage} disabled={loading} />
 
 
 <footer style={styles.footerInfo}>
@@ -94,4 +104,6 @@ heading: { fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: 0.2 },
 searchHint: { color: "#6b7280", fontSize: 12 },
 empty: { display: "grid", placeItems: "center", gap: 10, minHeight: 240, border: "1px dashed #d1d5db", borderRadius: 16, color: "#6b7280", background: "#ffffff" },
 footerInfo: { textAlign: "center", color: "#9ca3af", fontSize: 12, marginTop: 14 },
+state: { display: "grid", placeItems: "center", gap: 10, minHeight: 160, color: "#6b7280" },
+retryBtn: { border: "1px solid #d1d5db", borderRadius: 8, padding: "6px 10px", background: "#fff", cursor: "pointer" },
 };
