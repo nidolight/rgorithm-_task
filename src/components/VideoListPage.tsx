@@ -15,7 +15,7 @@ const [page, setPage] = useState<number>(1);
 // 서버 데이터
 const [items, setItems] = useState<Item[]>([]);
 const [lastPage, setLastPage] = useState<number>(1);
-const [loading, setLoading] = useState<boolean>(false);
+const [loading, setLoading] = useState<boolean>(true);
 const [error, setError] = useState<string | null>(null);
 
 
@@ -47,24 +47,23 @@ setQuery(keyword.trim());
 };
 
 
+const shouldShowInitialSkeleton =
+  !error && !query && items.length === 0; // ✅ 초기 진입(검색 전) 빈 결과면 스켈레톤
+
 const content = useMemo(() => {
-  if (loading) {
-    // ✅ 로딩 중에는 스켈레톤 그리드 렌더
+  if (loading || shouldShowInitialSkeleton) {
     return <VideoGrid items={[]} loading skeletonCount={9} />;
   }
   if (error) {
     return (
       <div style={styles.state}>
-        <div style={{ color: "#b91c1c" }}>
-          불러오는 중 오류가 발생했습니다: {error}
-        </div>
-        <button style={styles.retryBtn} onClick={() => setPage((p) => p)}>
-          Retry
-        </button>
+        <div style={{ color: "#b91c1c" }}>불러오는 중 오류가 발생했습니다: {error}</div>
+        <button style={styles.retryBtn} onClick={() => setPage((p) => p)}>Retry</button>
       </div>
     );
   }
   if (!items.length) {
+    // ✅ 이제부터는 "검색 후"에만 빈 상태 노출 (query가 있을 때)
     return (
       <div style={styles.empty}>
         <div style={{ fontSize: 40 }}>🔎</div>
@@ -73,7 +72,7 @@ const content = useMemo(() => {
     );
   }
   return <VideoGrid items={items} />;
-}, [loading, error, items, query]);
+}, [loading, error, items, query, shouldShowInitialSkeleton]);
 
 return (
 <div style={styles.container}>
