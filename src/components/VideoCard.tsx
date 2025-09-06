@@ -8,7 +8,7 @@ return (
 <a href={item.link || "#"} target="_blank" rel="noreferrer" style={styles.card}>
 <div style={styles.thumbWrap}>
 <img src={item.thumb} alt={item.title} style={styles.thumbImg} loading="lazy" />
-{/* 썸네일: 우하단 재생시간만 */}
+{/* 썸네일: 우하단 재생시간만 */}z
 <div style={{ ...styles.badge, ...styles.badgeBottomRight }}>{item.length}</div>
 </div>
 <div style={styles.cardBody}>
@@ -17,8 +17,15 @@ return (
 {/* 제목 아래: (좌) 카테고리 + 수정일자 / (우) 조회수 */}
 <div style={styles.infoRow}>
 <div style={styles.infoLeft}>
-<span style={styles.categoryPill}>{item.category}</span>
-<span style={styles.updatedText}>{formatDate(item.updated_at)}</span>
+  <span
+    style={{
+      ...styles.categoryPill,
+      ...(item.category === "PROMO" ? styles.categoryPromo : {}),
+    }}
+  >
+    {item.category}
+  </span>
+  <span style={styles.updatedText}>{formatDate(item.updated_at)}</span>
 </div>
 <div style={styles.infoRight}>👁 {formatNumber(item.view)}</div>
 </div>
@@ -48,6 +55,18 @@ title: { fontWeight: 700, fontSize: 15, lineHeight: 1.35, maxHeight: 42, overflo
 infoRow: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 },
 infoLeft: { display: "flex", alignItems: "center", gap: 8, color: "#374151", fontSize: 12 },
 infoRight: { fontSize: 12, color: "#4b5563", whiteSpace: "nowrap" },
-categoryPill: { display: "inline-block", fontSize: 12, color: "#fff", background: "#6d9af3ff", border: "1px solid #e5e7eb", padding: "3px 8px"},
+categoryPill: {
+    display: "inline-block",
+    fontSize: 12,
+    color: "#fff",
+    background: "#6d9af3ff",
+    border: "1px solid #e5e7eb",
+    padding: "3px 8px",
+},
+categoryPromo: {
+    color: "#6d9af3ff",        // 파란색 글씨
+    background: "#fff",      // 흰 배경
+    border: "1px solid #6d9af3ff",
+},
 updatedText: { fontSize: 12, color: "#6b7280" },
 };
