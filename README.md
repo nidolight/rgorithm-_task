@@ -1,46 +1,140 @@
-# Getting Started with Create React App
+# Video List (Search + Pagination)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Stack:** React (CRA) + TypeScript · Modular components · Inline styles
 
-## Available Scripts
+**Live:** [https://test.next-nas.uk/](https://test.next-nas.uk/)
 
-In the project directory, you can run:
+> 이 프로젝트는 **알고리즘코리아** 면접 후 과제로 진행했습니다.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Features
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+* 검색 + 페이지네이션
+* 서버 응답(`current_page / last_page / total / per_page`) 기반 페이징
+* 로딩/에러 상태 표시
 
-### `npm test`
+## API
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* **Base:** `https://trusuite.truabutment.com`
+* **Endpoint:** `/api/tada/list`
+* **Query:** `page` (number), `keyword` (string)
+* **Response (예시)**
 
-### `npm run build`
+```json
+{
+  "current_page": 1,
+  "data": [
+    {
+      "id": 22,
+      "title": "TruAbutment Smart Driver Tutorial",
+      "category": "LECTURE",
+      "length": "02:56",
+      "thumb": "https://.../thumb.png",
+      "uid": "",
+      "link": "https://youtu.be/nRP_ZLcbQds",
+      "view": 245,
+      "isDeleted": 0,
+      "created_at": "2023-07-26 18:16:54",
+      "updated_at": "2025-05-07 17:13:07"
+    }
+  ],
+  "last_page": 1,
+  "per_page": 9,
+  "total": 1
+}
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+> 현재 샘플 응답은 `total: 1`이라 한 개만 표시됩니다. 실제 데이터가 늘어나면 페이징/UI는 그대로 동작합니다.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Project Structure
 
-### `npm run eject`
+```
+src/
+  api/
+    client.ts            # fetchVideoList(page, keyword) — env/프록시에 따라 URL 결정
+  components/
+    SearchBar.tsx
+    Pagination.tsx
+    VideoCard.tsx
+    VideoGrid.tsx
+    VideoListPage.tsx     # 페이지 컨테이너 (검색/페이지 상태, 데이터 페칭)
+  types/
+    api.ts                # ApiResponse 타입 (라라벨 페이징 필드 포함)
+    video.ts              # Item 타입
+  utils/
+    format.ts             # formatNumber, formatDate(21 Jun 2022)
+  setupProxy.js           # (개발용) CRA Dev 프록시 설정
+  App.tsx
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+---
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Development (CRA)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+> CRA(dev)에서는 **프록시**를 써서 CORS/혼합콘텐츠를 피합니다. 코드에서는 항상 **상대경로**(`/api/...`)를 씁니다.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+1. **`src/setupProxy.js`**
 
-## Learn More
+```js
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+module.exports = function (app) {
+  app.use(
+    '/api',
+    createProxyMiddleware({
+      target: 'https://trusuite.truabutment.com',
+      changeOrigin: true,
+      logLevel: 'debug',
+      xfwd: true,
+      onProxyReq(proxyReq) {
+        proxyReq.setHeader('Origin', 'https://trusuite.truabutment.com');
+        proxyReq.setHeader('Referer', 'https://trusuite.truabutment.com/');
+        proxyReq.setHeader('Accept', 'application/json, text/plain, */*');
+        proxyReq.setHeader('User-Agent', 'Mozilla/5.0');
+      },
+    })
+  );
+};
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. **Client 호출** (`src/api/client.ts`)
+
+```ts
+const API_BASE = process.env.REACT_APP_API_BASE || ""; // dev: ""
+const API_PATH = "/api/tada/list";
+
+function buildUrl(page: number, keyword?: string) {
+  const base = API_BASE ? `${API_BASE}${API_PATH}` : API_PATH; // dev는 프록시, prod는 절대경로
+  const url = new URL(base, window.location.origin);
+  url.searchParams.set("page", String(page));
+  if (keyword) url.searchParams.set("keyword", keyword);
+  return url.toString();
+}
+```
+
+3. **Run**
+
+```bash
+npm install
+npm start
+```
+
+---
+
+## Scripts
+
+```bash
+npm start      # dev (CRA + setupProxy)
+npm run build  # production build
+```
+
+---
+
+## Credits
+
+* 과제: **알고리즘코리아**
+* 호스팅(현재): [https://test.next-nas.uk/](https://test.next-nas.uk/)
+* API: [https://trusuite.truabutment.com/api/tada/list](https://trusuite.truabutment.com/api/tada/list)

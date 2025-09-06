@@ -107,3 +107,4 @@ footerInfo: { textAlign: "center", color: "#9ca3af", fontSize: 12, marginTop: 14
 state: { display: "grid", placeItems: "center", gap: 10, minHeight: 160, color: "#6b7280" },
 retryBtn: { border: "1px solid #d1d5db", borderRadius: 8, padding: "6px 10px", background: "#fff", cursor: "pointer" },
 };
+
