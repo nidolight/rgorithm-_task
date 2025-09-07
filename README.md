@@ -45,7 +45,7 @@
 }
 ```
 
-> 현재 샘플 응답은 `total: 1`이라 한 개만 표시됩니다. 실제 데이터가 늘어나면 페이징/UI는 그대로 동작합니다.
+> 현재 예시 응답은 `total: 1`이라 한 개만 표시됩니다. 실제 데이터가 늘어나면 페이징/UI는 그대로 동작합니다.
 
 ---
 
@@ -54,19 +54,20 @@
 ```
 src/
   api/
-    client.ts            # fetchVideoList(page, keyword) — env/프록시에 따라 URL 결정
+    client.ts            # fetchVideoList(page, keyword)
   components/
     SearchBar.tsx
     Pagination.tsx
     VideoCard.tsx
     VideoGrid.tsx
+    SkeletonVideoCard.tsx # 스켈레톤 UI (VideoCard 스타일 기반)
     VideoListPage.tsx     # 페이지 컨테이너 (검색/페이지 상태, 데이터 페칭)
   types/
-    api.ts                # ApiResponse 타입 (라라벨 페이징 필드 포함)
+    api.ts                # ApiResponse 타입
     video.ts              # Item 타입
   utils/
     format.ts             # formatNumber, formatDate(21 Jun 2022)
-  setupProxy.js           # (개발용) CRA Dev 프록시 설정
+  setupProxy.js           
   App.tsx
 ```
 
@@ -80,6 +81,14 @@ src/
 
 ```js
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const https = require('https');
+
+const agent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 100,     // 동시 연결 여유
+  maxFreeSockets: 10,  // 유휴 연결 풀
+  timeout: 60000
+});
 
 module.exports = function (app) {
   app.use(
@@ -87,14 +96,12 @@ module.exports = function (app) {
     createProxyMiddleware({
       target: 'https://trusuite.truabutment.com',
       changeOrigin: true,
-      logLevel: 'debug',
+      secure: true,
+      agent,                 // keep-alive 적용
+      proxyTimeout: 15000,   // 백엔드 지연 시 빨리 실패
+      timeout: 15000,
+      logLevel: 'info',      // dev 때는 info/debug
       xfwd: true,
-      onProxyReq(proxyReq) {
-        proxyReq.setHeader('Origin', 'https://trusuite.truabutment.com');
-        proxyReq.setHeader('Referer', 'https://trusuite.truabutment.com/');
-        proxyReq.setHeader('Accept', 'application/json, text/plain, */*');
-        proxyReq.setHeader('User-Agent', 'Mozilla/5.0');
-      },
     })
   );
 };
